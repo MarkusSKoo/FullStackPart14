@@ -28,5 +28,8 @@ export const likeBlog = async (id: number) => {
 };
 
 export const addBlog = async (title: string, author: string, url: string) => {
-  await db.insert(blogs).values({ title, author, url });
+  const user = await db.query.users.findFirst({
+    orderBy: sql`RANDOM()`,
+  });
+  await db.insert(blogs).values({ title, author, url, userId: user.id });
 };
