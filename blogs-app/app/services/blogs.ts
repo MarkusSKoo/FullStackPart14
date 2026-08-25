@@ -1,65 +1,32 @@
-const blogs = [
-  {
-    id: 1,
-    title: "React patterns",
-    author: "Michael Chan",
-    url: "https://reactpatterns.com/",
-    likes: 7,
-  },
-  {
-    id: 2,
-    title: "Go To Statement Considered Harmful",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html",
-    likes: 5,
-  },
-  {
-    id: 3,
-    title: "Canonical string reduction",
-    author: "Edsger W. Dijkstra",
-    url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
-    likes: 12,
-  },
-  {
-    id: 4,
-    title: "First class tests",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.html",
-    likes: 10,
-  },
-  {
-    id: 5,
-    title: "TDD harms architecture",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/03/06/TDD-Harms-Architecture.html",
-    likes: 0,
-  },
-  {
-    id: 6,
-    title: "Type wars",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2016/12/17/TypeWars.html",
-    likes: 2,
-  },
-];
+import { eq, ilike } from "drizzle-orm";
+import { db } from "../../db";
+import { blogs } from "../../db/schema";
 
-let nextId = 7;
-
-export const getBlogs = () => {
-  return blogs;
+export const getBlogs = async (filter?: string) => {
+  if (filter) {
+    return db.query.blogs.findMany({
+      where: ilike(blogs.title, `%${filter}%`),
+    });
+  }
+  return db.query.blogs.findMany();
 };
 
-export const getBlogById = (id: number) => {
-  return blogs.find((blog) => blog.id === id);
+export const getBlogById = async (id: number) => {
+  return db.query.blogs.findFirst({
+    where: eq(blogs.id, id),
+  });
 };
 
-export const likeBlog = (id: number) => {
-  const blog = blogs.find((blog) => blog.id === id);
+export const likeBlog = async (id: number) => {
+  const blog = await getBlogById(id);
   if (blog) {
-    blog.likes++;
+    await db
+      .update(blogs)
+      .set({ likes: blog.likes + 1 })
+      .where(eq(blogs.id, id));
   }
 };
 
-export const addBlog = (title: string, author: string, url: string) => {
-  blogs.push({ id: nextId++, title, author, url, likes: 0 });
+export const addBlog = async (title: string, author: string, url: string) => {
+  await db.insert(blogs).values({ title, author, url });
 };
