@@ -14,5 +14,6 @@ export const registerUser = async (formData: FormData) => {
 
   await db.insert(users).values({ username, name, passwordHash });
 
+  revalidatePath("/users");
   redirect("/login");
 };
