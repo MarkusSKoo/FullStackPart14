@@ -2,11 +2,11 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useNotification } from "../components/NotificationContext";
 
 export default function LoginPage() {
+  const { showNotification } = useNotification();
   const router = useRouter();
-  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,31 +19,50 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid username or password");
+      showNotification("Invalid username or password", "error");
     } else {
+      showNotification("Login succesful");
       router.push("/");
       router.refresh();
     }
   };
 
   return (
-    <div>
-      <h2>login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>
+    <div className="max-w-2xl mx-auto p-6">
+      <h2 className="text-2xl font-bold underline mb-8">login</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+
+        <div className="flex items-center">
+          <label className="w-24" htmlFor="username">
             Username
-            <input type="text" name="username" required />
+            <input
+              id="username"
+              type="text"
+              name="username"
+              required
+              className="border border-gray-400 rounded px-3 py-2 bg-white text-black"
+            />
           </label>
         </div>
-        <div>
-          <label>
+
+        <div className="flex items-center">
+          <label className="w-24" htmlFor="password">
             Password
-            <input type="password" name="password" required />
+            <input
+              id="password"
+              type="password"
+              name="password"
+              required
+              className="border border-gray-400 rounded px-3 py-2 bg-white text-black"
+            />
           </label>
         </div>
-        <button type="submit">Login</button>
+
+        <button
+          type="submit"
+          className="border rounded bg-blue-700 px-5 py-2 text-white hover:bg-blue-900"
+          data-testid="login-button"
+        >Login</button>
       </form>
     </div>
   );

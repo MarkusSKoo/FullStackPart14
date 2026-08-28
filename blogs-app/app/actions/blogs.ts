@@ -6,33 +6,36 @@ import { auth } from "@/auth";
 import { addBlog } from "../services/blogs";
 import { likeBlog } from "../services/blogs";
 
-export const createBlog = async (
-  prevstate: { error: string },
-  formData: FormData,
-) => {
+export const createBlog = async (prevstate: any, formData: FormData) => {
   const session = await auth();
   if (!session) {
     redirect("/login");
   }
 
   const title = formData.get("title") as string;
-  if (!title || title.length < 5) {
-    return { error: "Title must be at least 5 charachters long" };
-  }
-
   const author = formData.get("author") as string;
-  if (!author || author.length < 5) {
-    return { error: "Author must be at least 5 charachters long" };
-  }
-
   const url = formData.get("url") as string;
-  if (!url || url.length < 5) {
-    return { error: "Url must be at least 5 charachters long" };
+
+  if (
+    !title ||
+    title.length < 5 ||
+    !author ||
+    author.length < 5 ||
+    !url ||
+    url.length < 5
+  ) {
+    return {
+      error: "Title, author and url must be at least 5 charachters long",
+      success: false,
+      title,
+      author,
+      url,
+    };
   }
 
   await addBlog(title, author, url);
   revalidatePath("/blogs");
-  redirect("/blogs");
+  return { error: "", success: true };
 };
 
 export const addBlogLike = async (formData: FormData) => {
